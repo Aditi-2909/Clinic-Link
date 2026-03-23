@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+
+.active hr{
+    @apply block
+}
+
+@utility grid-cols-auto{
+    grid-template-columns: repeat(auto-fill,minmax(200px,1fr));
+}

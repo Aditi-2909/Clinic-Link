@@ -37,7 +37,7 @@ const Navbar = () => {
                     <img src={assets.profile_pic} alt=""className='rounded-full w-8' />
                     <img src={assets.dropdown_icon} alt="" className='w-2.5' />
                     <div className='absolute top-0 right-0 pt-14 text-base font-medium  hidden group-hover:block z-20'>
-                        <div className='min-w-48  bg-gradient-to-r from-[#4fdbed] to-[#43f484] text-white rounded p-4 gap-4 flex flex-col shadow-lg'>
+                        <div className='min-w-48  bg-gray-100 rounded p-4 gap-4 flex flex-col shadow-lg'>
                             <p onClick={()=>navigate('/my-profile')}className='hover:text-black'>MyProfile</p>
                             <p onClick={()=>navigate('/my-appointments')} className='hover:text-black'>MyAppointments</p>
                             <p  onClick={()=>setToken(false)}className='hover:text-black'>Logout</p>

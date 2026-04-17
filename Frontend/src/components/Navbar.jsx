@@ -75,14 +75,21 @@
 
 
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useContext } from 'react'
 import { assets } from '../assets/assets'
 import { NavLink, useNavigate } from 'react-router-dom'
+import { AppContext } from '../context/AppContext'
 
 const Navbar = () => {
     const navigate = useNavigate()
     const [showMenu, setShowMenu] = useState(false)
-    const [token, setToken] = useState(true) // Set false if you want initially logged-out
+    const {token,setToken} = useContext(AppContext)
+
+    const logout = () => {
+        setToken(false)
+        localStorage.removeItem('token')
+    }
+    // const [token, setToken] = useState(true) // Set false if you want initially logged-out
     const [showProfileDropdown, setShowProfileDropdown] = useState(false)
     const profileRef = useRef(null)
 
@@ -141,7 +148,7 @@ const Navbar = () => {
                                     My Appointments
                                 </p>
                                 <p
-                                    onClick={() => setToken(false)}
+                                    onClick={logout}
                                     className='cursor-pointer hover:bg-gray-200 px-2 py-1 rounded'
                                 >
                                     Logout

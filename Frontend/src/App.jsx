@@ -12,6 +12,7 @@ import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Chatbot from "./components/Chatbot";
 
 const App = () => {
   return (
@@ -31,6 +32,7 @@ const App = () => {
         <Route path='/appointment/:docId' element={<Appointment/>}/>
       
       </Routes>
+      <Chatbot/>
       <Footer/>
     </div>
   )

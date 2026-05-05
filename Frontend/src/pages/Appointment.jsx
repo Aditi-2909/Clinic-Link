@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
-import {useNavigate, useParams} from 'react-router-dom'
-import {AppContext} from '../context/AppContext'
+import { useNavigate, useParams } from 'react-router-dom'
+import { AppContext } from '../context/AppContext'
 import { assets } from '../assets/assets'
 import RelatedDoctors from '../components/RelatedDoctors'
 import { toast } from 'react-toastify'
@@ -8,11 +8,11 @@ import axios from 'axios'
 
 const Appointment = () => {
 
-  const {docId} = useParams()
+  const { docId } = useParams()
 
-  const {doctors, currencySymbol, backendUrl, token , getDoctorsData } = useContext(AppContext);
+  const { doctors, currencySymbol, backendUrl, token, getDoctorsData } = useContext(AppContext);
 
-  const daysOfWeek = ['SUN','MON','TUE','WED','THU','FRI','SAT']
+  const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
 
   const navigate = useNavigate()
 
@@ -26,31 +26,28 @@ const Appointment = () => {
     const docInfo = doctors.find(doc => doc._id === docId)
     setDOcInfo(docInfo)
     // console.log(docInfo);
-    
+
   }
 
   const getAvailableSlots = async () => {
-    //if (!docInfo) return;
-    //if (!docInfo || !docInfo.slots_booked) return;
-
     setDocSlots([])
 
     //get current date
     let today = new Date()
 
-    for(let i = 0; i < 7; i++){
+    for (let i = 0; i < 7; i++) {
       //get date with index
       let currentDate = new Date(today)
 
-      currentDate.setDate(today.getDate()+i)
+      currentDate.setDate(today.getDate() + i)
 
       //setting end time of date with index
       let endTime = new Date()
-      endTime.setDate(today.getDate()+i)
-      endTime.setHours(21,0,0,0)
+      endTime.setDate(today.getDate() + i)
+      endTime.setHours(21, 0, 0, 0)
 
       //setting hours
-      if(today.getDate() === currentDate.getDate()){
+      if (today.getDate() === currentDate.getDate()) {
         currentDate.setHours(currentDate.getHours() > 10 ? currentDate.getHours() + 1 : 10)
         currentDate.setMinutes(currentDate.getMinutes() > 30 ? 30 : 0)
       } else {
@@ -60,91 +57,94 @@ const Appointment = () => {
 
       let timeSlots = []
 
-      while(currentDate < endTime){
-        let formattedTime = currentDate.toLocaleTimeString([],{hour: '2-digit', minute: '2-digit'})
-       
+      while (currentDate < endTime) {
+        let formattedTime = currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+
         let day = currentDate.getDate()
-        let month = currentDate.getMonth()+1
+        let month = currentDate.getMonth() + 1
         let year = currentDate.getFullYear()
 
-        const slotDate = day +"_"+month +"_"+year
+        const slotDate = day + "_" + month + "_" + year
         const slotTime = formattedTime
 
-        const isSlotAvailable = docInfo.slots_booked[slotDate]&& docInfo.slots_booked[slotDate].includes(slotTime) ? false: true
-
-        if(isSlotAvailable){
+        const isSlotAvailable = docInfo.slots_booked[slotDate] && docInfo.slots_booked[slotDate].includes(slotTime) ? false : true
+        if (isSlotAvailable) {
           // add slot to array
           timeSlots.push({
-          dateTime: new Date(currentDate),
-          time: formattedTime
-        })
+            dateTime: new Date(currentDate),
+            time: formattedTime
+          })
+
         }
-        
-        
+
+
 
         //increment current time by 30 min
-        currentDate.setMinutes(currentDate.getMinutes()+30)
+        currentDate.setMinutes(currentDate.getMinutes() + 30)
       }
       setDocSlots(prev => ([...prev, timeSlots]))
     }
   }
 
-
-  const bookAppointment = async ()=>{
-    if(!token){
-      toast.warn('Login to book appointment')
+  const bookAppointment = async () => {
+    if (!token) {
+      toast.warning('Login to book appointment')
       return navigate('/login')
     }
-    try{
-     const date = docSlots[slotIndex][0].dateTime
-     
-     let day = date.getDate()
-     let month = date .getMonth()+1
-     let year = date.getFullYear()
 
-     const slotDate = day +"_"+month +"_"+year
+    try {
 
-     const {data }= await axios.post(backendUrl + '/api/user/book-appointment',{docId,slotDate,slotTime},{headers:{token}})
-      if(data.success){
+      const date = docSlots[slotIndex][0].dateTime
+
+      let day = date.getDate()
+      let month = date.getMonth() + 1
+      let year = date.getFullYear()
+
+      const slotDate = day + "_" + month + "_" + year
+      // console.log(slotDate);
+      const { data } = await axios.post(backendUrl + '/api/user/book-appointment', { docId, slotDate, slotTime }, { headers: { token } })
+
+      if (data.success) {
         toast.success(data.message)
         getDoctorsData()
         navigate('/my-appointments')
-      }else{
+      } else {
         toast.error(data.message)
       }
-     
 
-    }catch(error){
-      console.log(error)
+
+    } catch (error) {
+      console.log(error);
       toast.error(error.message)
+
     }
   }
 
-  useEffect(()=>{
-fetchDocInfo()
-  },[doctors,docId])
+  useEffect(() => {
+    fetchDocInfo()
+  }, [doctors, docId])
 
-  useEffect(()=>{
-getAvailableSlots()
-  },[docInfo])
+  useEffect(() => {
+    getAvailableSlots()
+  }, [docInfo])
 
-  useEffect(()=>{
-console.log(docSlots);
+  useEffect(() => {
+    console.log(docSlots);
 
-  },[docSlots])
+  }, [docSlots])
 
   return docInfo && (
     <div>
       {/* doctor details  */}
       <div className='flex flex-col sm:flex-row gap-4'>
         <div>
-          <img src={docInfo.image} alt="" className='bg-gradient-to-b from-blue-100 to-green-50 w-full sm:max-w-72 rounded-lg'/>
+          <img src={docInfo.image} alt="" className='bg-gradient-to-b from-blue-100 to-green-50 w-full sm:max-w-72 rounded-lg' />
         </div>
         <div className='flex-1 border border-gray-400 rounded-lg p-8 py-7 bg-white mx-2 sm:mx-0 mt-[-80px] sm:mt-0'>
           {/* doctor name, degree, experince  */}
           <p className='flex items-center gap-2 text-2xl font-medium text-gray-900'>
-            {docInfo.name} 
-            <img src={assets.verified_icon} alt="" className='w-5'/>
+            {docInfo.name}
+            <img src={assets.verified_icon} alt="" className='w-5' />
           </p>
           <div className='flex items-center gap-2 text-sm mt-1 text-gray-600'>
             <p>
@@ -169,8 +169,8 @@ console.log(docSlots);
       <div className='sm:ml-72 sm:pl-4 mt-4 font-medium text-gray-700'>
         <p>Booking slots</p>
         <div className='gap-3 flex items-center w-full overflow-x-scroll mt-4'>
-          {docSlots.length && docSlots.map((item,index)=>(
-            <div onClick={()=>setSlotIndex(index)} className={`text-center py-6 rounded-full min-w-16 cursor-pointer ${slotIndex === index ? 'bg-blue-900 text-white' : 'border border-gray-200'}`} key={index}>
+          {docSlots.length && docSlots.map((item, index) => (
+            <div onClick={() => setSlotIndex(index)} className={`text-center py-6 rounded-full min-w-16 cursor-pointer ${slotIndex === index ? 'bg-blue-900 text-white' : 'border border-gray-200'}`} key={index}>
               <p>{item[0] && daysOfWeek[item[0].dateTime.getDay()]}</p>
               <p>{item[0] && item[0].dateTime.getDate()}</p>
             </div>
@@ -178,8 +178,8 @@ console.log(docSlots);
         </div>
 
         <div className='flex items-center gap-3 w-full overflow-x-scroll mt-4'>
-          {docSlots.length && docSlots[slotIndex].map((item,index)=>(
-            <p onClick={()=>setSlotTime(item.time)} className={`text-sm font-light flex-shrink-0 px-5 py-2 rounded-full cursor-pointer ${item.time === slotTime ? 'bg-blue-900 text-white' : 'text-gray-400 border border-gray-300'}`} key={index}>
+          {docSlots.length && docSlots[slotIndex].map((item, index) => (
+            <p onClick={() => setSlotTime(item.time)} className={`text-sm font-light flex-shrink-0 px-5 py-2 rounded-full cursor-pointer ${item.time === slotTime ? 'bg-blue-900 text-white' : 'text-gray-400 border border-gray-300'}`} key={index}>
               {item.time.toLowerCase()}
             </p>
           ))}
@@ -191,7 +191,11 @@ console.log(docSlots);
       </div>
 
       {/* related doctors list  */}
-      <RelatedDoctors docId={docId} speciality={docInfo.speciality}/>
+      {/* <RelatedDoctors docId={docId} speciality={docInfo.speciality} /> */}
+      <RelatedDoctors docId={docId} speciality={docInfo.specialty} />
+      {/* console.log("docInfo:", docInfo)
+console.log("speciality:", docInfo?.specialty)
+console.log("all doctors:", doctors) */}
     </div>
   )
 }
